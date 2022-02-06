@@ -1,3 +1,12 @@
+"""
+add this to config
+sensor:
+    - name: halo_infinite_integration
+      token: <api_token>
+      gamer_tag: <gamertag>
+      season: <ranked season>
+      api_version: "0.3.8"
+"""
 import logging
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.core import HomeAssistant
