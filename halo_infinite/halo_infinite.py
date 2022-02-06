@@ -1,27 +1,46 @@
-from csr import CSR, CSREntry
-from api_calls import get_csr, get_match_list_json
+from csr import CSR
+import requests
+from furl import furl
 
 class HaloInfinite:
     def __init__(self, name, gamertag, token, season, api_version):
         self.name = name
         self.gamertag = gamertag
-        self.token = token
         self.season = season
-        self.version = api_version
-        self.attr = {}
+        self.client = Client(api_version, token)
         if not self.update_csr():
             return
 
 
     def update_csr(self):
-        try:
-            response = get_csr(self.gamertag, self.token, self.season, self.version)
-            csr = CSR(response)
-            self.attr['crossplay'] = csr.playlists['crossplay']
-            self.attr['controller'] = csr.playlists['controller']
-            self.attr['mnk'] = csr.playlists['mnk']
-            return True
-        finally:
-            return
+        response = self.client.request_csr(self.gamertag, self.season)
+        csr = CSR(response)
+        data = {
+            'crossplay': csr.playlists['crossplay'],
+            'controller': csr.playlists['controller'],
+            'mnk': csr.playlists['mnk']
+        }
+        return data
+
+class Client:
+    # single_match_url = f'https://halo.api.stdlib.com/infinite@{API_VERSION}/stats/matches/retrieve/?id={match_id}'
+    # match_list_url = f'https://halo.api.stdlib.com/infinite@{API_VERSION}/stats/matches/list/?gamertag={gamer_tag}&limit.count={count}&limit.offset={offset}&mode=matchmade'
+
+    def __init__(self, api_version, api_token):
+        self.session = requests.session()
+        self.session.headers.update({
+            f'Authorization': 'Bearer ' + api_token
+        })
+        self.BASE_URL = f'https://halo.api.stdlib.com/infinite@{api_version}/stats/'
+
+    def request_csr(self, gamertag, season):
+        url = furl(self.BASE_URL)
+        url /= 'csr/'
+        url.args['gamertag'] = gamertag
+        url.args['season'] = season
+        response = self.session.get(url.url)
+        if response.status_code != 200:
+            raise Exception
+        return response.json()
 
 

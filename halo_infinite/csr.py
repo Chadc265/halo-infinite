@@ -1,3 +1,4 @@
+
 class CSR:
     def __init__(self, json_response):
         data = json_response.get('data', None)
