@@ -1,4 +1,4 @@
-from csr import CSR
+from .csr import CSR
 import requests
 from furl import furl
 
