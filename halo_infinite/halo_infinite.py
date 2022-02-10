@@ -8,6 +8,7 @@ class HaloInfinite:
         self.gamertag = gamertag
         self.season = season
         self.client = Client(api_version, token)
+        self.data = None
         if not self.update_csr():
             return
 
@@ -15,12 +16,11 @@ class HaloInfinite:
     def update_csr(self):
         response = self.client.request_csr(self.gamertag, self.season)
         csr = CSR(response)
-        data = {
+        self.data = {
             'crossplay': csr.playlists['crossplay'],
             'controller': csr.playlists['controller'],
             'mnk': csr.playlists['mnk']
         }
-        return data
 
 class Client:
     # single_match_url = f'https://halo.api.stdlib.com/infinite@{API_VERSION}/stats/matches/retrieve/?id={match_id}'
