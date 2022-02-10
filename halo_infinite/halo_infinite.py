@@ -35,10 +35,11 @@ class Client:
 
     def request_csr(self, gamertag, season):
         url = furl(self.BASE_URL)
-        url /= 'csr/'
+        url /= 'csrs/'
         url.args['gamertag'] = gamertag
         url.args['season'] = season
         response = self.session.get(url.url)
+        print(response.json())
         if response.status_code != 200:
             raise Exception
         return response.json()
