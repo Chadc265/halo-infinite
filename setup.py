@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="halo-infinite",
-    version="0.0.5",
+    version="0.0.6",
     description="A small package I needed to have on PyPi to make a home assistant integration",
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -6,30 +6,29 @@ from requests.exceptions import RequestException
 from furl import furl
 
 class HaloInfinite:
-    def __init__(self, gamertag, token, season, api_version):
+    def __init__(self, gamertag, token, api_version):
         self.gamertag = gamertag
-        self.season = season
+        # self.season = season
         self.client = Client(api_version, token)
         self.csrs = None
-        self.csrs_changed = False
         self.recent_matches = []
         self.new_matches = False
 
     def update_csr(self):
         try:
-            response = self.client.request_csr(self.gamertag, self.season)
+            response = self.client.request_csr(self.gamertag)
         except RequestException as e:
             raise e
         csr = CSR(response)
-        self.csrs_changed = any([self.csrs[k] != csr.playlists[k] for k in ['crossplay', 'controller', 'mnk']])
-        if self.csrs_changed:
-            self.csrs = {
-                'crossplay': csr.playlists['crossplay'],
-                'controller': csr.playlists['controller'],
-                'mnk': csr.playlists['mnk']
-            }
-            return True
-        return False
+        something_changed = self.csrs is None or \
+                            any([self.csrs[k].current_value != csr.playlists[k].current_value for k in
+                                 ['crossplay', 'controller', 'mnk']])
+        self.csrs = {
+            'crossplay': csr.playlists['crossplay'],
+            'controller': csr.playlists['controller'],
+            'mnk': csr.playlists['mnk']
+        }
+        return something_changed
 
     def update_recent_matches(self):
         try:
@@ -38,8 +37,7 @@ class HaloInfinite:
             raise e
         match_list_result = MatchListResult(response)
         match_list = [Match(m, self.gamertag) for m in match_list_result.matches]
-        self.new_matches = not any([m in self.recent_matches for m in match_list])
-        if self.new_matches:
+        if not any([m in self.recent_matches for m in match_list]):
             self.recent_matches = match_list
             return True
         return False
@@ -54,11 +52,11 @@ class Client:
         }
         self.BASE_URL = f'https://halo.api.stdlib.com/infinite@{api_version}/stats/'
 
-    def request_csr(self, gamertag, season):
+    def request_csr(self, gamertag):
         url = furl(self.BASE_URL)
         url /= 'csrs/'
         url.args['gamertag'] = gamertag
-        url.args['season'] = season
+        # url.args['season'] = season
         with requests.session() as s:
             s.headers.update(self.headers)
             response = s.get(url.url)
