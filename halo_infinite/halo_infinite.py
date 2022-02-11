@@ -6,13 +6,15 @@ from requests.exceptions import RequestException
 from furl import furl
 
 class HaloInfinite:
-    def __init__(self, gamertag, token, api_version):
+    def __init__(self, gamertag, token, api_version, num_recent_matches=10):
         self.gamertag = gamertag
         # self.season = season
         self.client = Client(api_version, token)
         self.csrs = None
         self.recent_matches = []
         self.new_matches = False
+        self.num_recent_matches = max(min(num_recent_matches, 25), 1)
+
 
     def update_csr(self):
         try:
@@ -32,12 +34,12 @@ class HaloInfinite:
 
     def update_recent_matches(self):
         try:
-            response = self.client.request_match_list(self.gamertag, count=10, offset=1)
+            response = self.client.request_match_list(self.gamertag, count=self.num_recent_matches, offset=1)
         except RequestException as e:
             raise e
         match_list_result = MatchListResult(response)
         match_list = [Match(m, self.gamertag) for m in match_list_result.matches]
-        if not any([m in self.recent_matches for m in match_list]):
+        if not all([m in self.recent_matches for m in match_list]):
             self.recent_matches = match_list
             return True
         return False
