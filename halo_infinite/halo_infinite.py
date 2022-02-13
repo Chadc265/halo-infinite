@@ -34,7 +34,7 @@ class HaloInfinite:
 
     def update_recent_matches(self):
         try:
-            response = self.client.request_match_list(self.gamertag, count=self.num_recent_matches, offset=1)
+            response = self.client.request_match_list(self.gamertag, count=self.num_recent_matches, offset=0)
         except RequestException as e:
             raise e
         match_list_result = MatchListResult(response)
